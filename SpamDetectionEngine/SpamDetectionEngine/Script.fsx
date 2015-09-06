@@ -40,6 +40,9 @@ let primitiveClassifier (sms:string) =
     then Spam
     else Ham
 
+#load "NaiveBayes.fs"
+open NaiveBayes.Classifier
+Hello "World"
 
 //let identify (example:DocType*string) = 
 //    let docType,content = example

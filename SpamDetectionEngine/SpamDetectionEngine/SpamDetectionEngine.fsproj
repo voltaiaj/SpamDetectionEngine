@@ -42,6 +42,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NaiveBayes.fs" />
     <Compile Include="Library1.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>

@@ -44,6 +44,33 @@ let primitiveClassifier (sms:string) =
 open NaiveBayes.Classifier
 Hello "World"
 
+type Token = string
+type Tokenizer = string -> Token Set
+type TokenizedDoc = Token Set
+
+type DocsGroup = 
+    {   Porportion:float;
+        TokenFrequencies:Map<Token,float> }
+
+let tokenScore (group:DocsGroup) (token:Token) = 
+    if group.TokenFrequencies.ContainsKey token
+    then log group.TokenFrequencies.[token]
+    else 0.0
+
+let score (document:TokenizedDoc) (group:DocsGroup) = 
+    let scoreToken = tokenScore group
+    log group.Porportion +
+    (document |> Seq.sumBy scoreToken)
+
+let classify (groups:(_*DocsGroup)[]) 
+        (tokenizer:Tokenizer) 
+        (txt:string) =
+    let tokenized = tokenizer txt 
+    groups
+    |> Array.maxBy(fun (label,group) -> 
+        score tokenized group)
+    |> fst
+
 //let identify (example:DocType*string) = 
 //    let docType,content = example
 //    match docType with

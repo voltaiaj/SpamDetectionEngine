@@ -44,12 +44,25 @@ let primitiveClassifier (sms:string) =
 open NaiveBayes.Classifier
 Hello "World"
 
+open System.Text.RegularExpressions
+let matchWords = Regex(@"\w+")
+
+let tokens (text:string) = 
+    text.ToLowerInvariant()
+    |> matchWords.Matches
+    |> Seq.cast<Match>
+    |> Seq.map (fun m -> m.Value)
+    |> Set.ofSeq
+
+
+//_______________________________________________
+
 type Token = string
 type Tokenizer = string -> Token Set
 type TokenizedDoc = Token Set
 
 type DocsGroup = 
-    {   Porportion:float;
+    {   Proportion:float;
         TokenFrequencies:Map<Token,float> }
 
 let tokenScore (group:DocsGroup) (token:Token) = 
@@ -59,7 +72,7 @@ let tokenScore (group:DocsGroup) (token:Token) =
 
 let score (document:TokenizedDoc) (group:DocsGroup) = 
     let scoreToken = tokenScore group
-    log group.Porportion +
+    log group.Proportion +
     (document |> Seq.sumBy scoreToken)
 
 let classify (groups:(_*DocsGroup)[]) 
@@ -70,6 +83,52 @@ let classify (groups:(_*DocsGroup)[])
     |> Array.maxBy(fun (label,group) -> 
         score tokenized group)
     |> fst
+
+//helper functions 
+let proportion count total = float count / float total
+let laplace count total = float (count+1) / float (total+1)
+let countIn (group:TokenizedDoc seq) (token:Token) =
+    group
+    |> Seq.filter (Set.contains token)
+    |> Seq.length
+
+//Analyzing a group of documents
+let analyze (group:TokenizedDoc seq)
+            (totalDocs:int)
+            (classificationTokens:Token Set)=
+    let groupSize = group |> Seq.length
+    let score token =
+        let count = countIn group token
+        laplace count groupSize
+    let scoredTokens =
+        classificationTokens
+        |> Set.map (fun token -> token, score token)
+        |> Map.ofSeq
+    let groupProportion = proportion groupSize totalDocs
+    {
+        Proportion = groupProportion
+        TokenFrequencies = scoredTokens
+    }
+
+//Learning from documents
+let learn (docs:(_ * string)[])
+          (tokenizer:Tokenizer)
+          (classificationTokens:Token Set) =
+    let total = docs.Length
+    docs
+    |> Array.map (fun (label,docs) -> label,tokenizer docs)
+    |> Seq.groupBy fst
+    |> Seq.map (fun (label,group) -> label,group |> Seq.map snd)
+    |> Seq.map (fun (label,group) -> label,analyze group total classificationTokens)
+    |> Seq.toArray
+
+//Training a naive Bayes classifier
+let train (docs:(_ * string)[])
+          (tokenizer:Tokenizer)
+          (classificationTokens:Token Set) = 
+    let groups = learn docs tokenizer classificationTokens
+    let classifier = classify groups tokenizer
+    classifier
 
 //let identify (example:DocType*string) = 
 //    let docType,content = example

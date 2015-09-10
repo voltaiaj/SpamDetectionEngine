@@ -43,6 +43,8 @@ let primitiveClassifier (sms:string) =
 open System.Text.RegularExpressions
 let matchWords = Regex(@"\w+")
 
+
+//tokenizer
 let tokens (text:string) = 
     text.ToLowerInvariant()
     |> matchWords.Matches
@@ -57,23 +59,12 @@ let tokens (text:string) =
 open NaiveBayes.Classifier
 
 let training = dataset
-let wordTokenizer = "txt"
-let txtClassifier = train training tokens (["txt"] |> set)
+let validation = dataset
+let wordTokenizer = tokens
 
-dataset
+let txtClassifier = train training wordTokenizer (["txt"] |> set)
+
+validation
 |> Seq.averageBy (fun (docType,sms) ->
     if docType = txtClassifier sms then 1.0 else 0.0)
 |> printfn "Based on 'txt', correctly classified: %.3f"
-
-
-
-
-
-//let identify (example:DocType*string) = 
-//    let docType,content = example
-//    match docType with
-//    | Ham -> printfn "'%s' is ham" content
-//    | Spam -> printfn "'%s' is spam" content
-//
-//identify (Ham, "good message");;
-    

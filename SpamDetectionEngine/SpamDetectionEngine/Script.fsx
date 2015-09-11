@@ -43,7 +43,6 @@ let primitiveClassifier (sms:string) =
 open System.Text.RegularExpressions
 let matchWords = Regex(@"\w+")
 
-
 //tokenizer
 let tokens (text:string) = 
     text.ToLowerInvariant()

@@ -57,8 +57,8 @@ let tokens (text:string) =
 #load "NaiveBayes.fs"
 open NaiveBayes.Classifier
 
-let training = dataset
-let validation = dataset
+let training = dataset.[1000..]
+let validation = dataset.[..999]
 let wordTokenizer = tokens
 
 let txtClassifier = train training wordTokenizer (["txt"] |> set)
@@ -67,3 +67,4 @@ validation
 |> Seq.averageBy (fun (docType,sms) ->
     if docType = txtClassifier sms then 1.0 else 0.0)
 |> printfn "Based on 'txt', correctly classified: %.3f"
+

@@ -77,3 +77,13 @@ module Classifier =
         let groups = learn docs tokenizer classificationTokens
         let classifier = classify groups tokenizer
         classifier
+
+    let vocabulary (tokenizer:Tokenizer) (corpus:string seq) =
+        corpus
+        |> Seq.map tokenizer
+        |> Set.unionMany
+
+    let allTokens = 
+        training 
+        |> Seq.map snd
+        |> vocabulary wordTokenizer

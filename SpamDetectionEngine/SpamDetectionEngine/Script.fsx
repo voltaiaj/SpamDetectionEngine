@@ -68,3 +68,7 @@ validation
     if docType = txtClassifier sms then 1.0 else 0.0)
 |> printfn "Based on 'txt', correctly classified: %.3f"
 
+let allTokens = 
+        training 
+        |> Seq.map snd
+        |> vocabulary wordTokenizer

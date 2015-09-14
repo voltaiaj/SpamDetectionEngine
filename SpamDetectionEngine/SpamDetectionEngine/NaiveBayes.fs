@@ -83,7 +83,4 @@ module Classifier =
         |> Seq.map tokenizer
         |> Set.unionMany
 
-    let allTokens = 
-        training 
-        |> Seq.map snd
-        |> vocabulary wordTokenizer
+    
